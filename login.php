@@ -2,23 +2,27 @@
   include('header.php');
   include('db.php');
 
+  // メールアドレスとパスワードからユーザを取りに行く
+  function getUser($email, $password) {
+    $pdo = getPDO();
+    $stmt = $pdo->prepare('SELECT * FROM users WHERE email = :email AND password = :password');
+    $stmt->execute([':email' => $email, ':password' => $password]);
+    return $stmt->fetch();
+  }
+
   $message = 'ログイン情報を入力してください';
   $exec_login = false;
   if ($_GET['email']) {
     $exec_login = true;
-    $pdo = getPDO();
-    $stmt = $pdo->prepare('SELECT * FROM users WHERE email = :email AND password = :password');
-    $stmt->execute([':email' => $_GET['email'], ':password' => $_GET['password']]);
-    $result = $stmt->fetch();
-
+    $result = getUser($_GET['email'], $_GET['password']);
     if ($result) {
       setcookie('user_id', $result['id']);
       setcookie('msg', 'ログインしました');
-      header('Location: http://127.0.0.1:8080/whisper.php');
+      header('Location: http://localhost:3001/whisper.php');
       exit();
-    } else {
-      $message = 'ログイン情報が違います';
     }
+
+    $message = 'ログイン情報が違います';
   }
  ?>
 
